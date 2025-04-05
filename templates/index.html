@@ -6,6 +6,14 @@
 
 {% block main %}
 <body>
-    <h1>Welcome</h1>
+    <h1>Welcome to Recipe Scraper!</h1>
+    <p>Enter your recipe link below and we will scrape it for you!</p>
+    <form>
+        <div class="mb-3">
+            <input autofocus class="form-control mx-auto w-auto" name="recipe" placeholder="Recipe Link" type="text">
+        </div>
+        <button class="btn btn-primary" type="submit">Get Quote</button>
+    </form>
+    
 </body>
 {% endblock %}
