@@ -23,7 +23,7 @@ def login_required(f):
     """
     @wraps(f)
     def decorated_function(*args, **kwargs):
-        if session.get("userid") is None:
+        if session.get("user_id") is None:
             return redirect("/login")
         return f(*args, **kwargs)
     return decorated_function
@@ -32,6 +32,8 @@ def login_required(f):
 @app.route("/")
 @login_required
 def index():
+    
+    
     return render_template("index.html")
 
 @app.route("/login", methods=["GET", "POST"])
@@ -41,10 +43,35 @@ def login():
     session.clear()
     if request.method == "POST":
         username = request.form.get("username")
+        password = request.form.get("password")
         if not username:
             flash("Must include username")
             return render_template("login.html")
-        return redirect("/index")
+        if not password:
+            flash("Must include password")
+            return render_template("login.html")
+        
+        # use with to handle connection to DB
+        with sql.connect(db) as conn:
+            cursor = conn.cursor()
+            cursor.execute("SELECT * FROM users WHERE username = ?", (username,))
+            
+            try: 
+                user_info = cursor.fetchone()
+                print(check_password_hash(user_info[2], password))
+                if check_password_hash(user_info[2], password):
+                    session["user_id"] = user_info[0]
+                    session["username"] = request.form.get("username")
+                    return redirect("/")
+                else:
+                    print("WRONG USERNAME")
+                    print(user_info)
+                    flash("username/password incorrect")
+                    return render_template("login.html")
+            except sql.Error as e:
+                print(e)
+                flash("username/password incorrect")
+                return render_template("login.html")
     return render_template("login.html")
 
 @app.route("/register", methods=["GET", "POST"])
@@ -83,8 +110,8 @@ def register():
                 pass_hash = generate_password_hash(pass1, method='scrypt', salt_length=16)
                 # insert username and password into 
                 cursor.execute("INSERT INTO users (username, pass_hash) VALUES (?, ?)", (username, pass_hash))
-                cursor.commit()
-                cursor.close()
+                conn.commit()
+                conn.close()
                 return redirect("/")
     except sql.Error as e:
         flash("Error registering please try again")
