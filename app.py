@@ -36,6 +36,11 @@ def index():
     
     return render_template("index.html")
 
+@app.route("/scrape")
+@login_required
+def scrape():
+    return render_template("scrape.html")
+
 @app.route("/login", methods=["GET", "POST"])
 def login():
     """ Log In """
