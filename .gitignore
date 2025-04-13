@@ -5,7 +5,7 @@ __pycache__/
 
 #random things I dont want in git
 flask_session/
-
+*.csv
 
 # user database
 users.db

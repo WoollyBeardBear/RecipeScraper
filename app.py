@@ -2,6 +2,9 @@ from flask import Flask, render_template, session, request, redirect, flash
 from flask_session import Session
 from functools import wraps
 from werkzeug.security import check_password_hash, generate_password_hash
+from scrapy.crawler import CrawlerProcess
+from scrapy.settings import Settings
+from recipescraper.recipescraper.spider.recipescraper import recipespider
 import datetime
 import sqlite3 as sql
 import time
@@ -28,6 +31,20 @@ def login_required(f):
         return f(*args, **kwargs)
     return decorated_function
 
+def run_spider(url):
+    settings = Settings()
+
+    crawler = CrawlerProcess(settings)
+    results = []
+
+    def item_scraped(item, response, spider):
+        results.append(item)
+    crawler.signals.connect(item_scraped, signal=scrapy.signals.item_scraped)
+    crawler.crawl(recipespider, recipe_url=url)
+    crawler.start()
+    return results
+
+def store_recipe()
 
 @app.route("/")
 @login_required
@@ -36,10 +53,16 @@ def index():
     
     return render_template("index.html")
 
-@app.route("/scrape")
+@app.route("/add_recipe")
 @login_required
-def scrape():
+def add_recipe():
+    if request.method == "POST":
+        recipe_url = request.form["recipe_url"]
+        scraped_data = run_spider(recipe_url)
+        if scraped_data:
+            store_recipe(scraped_data)
     return render_template("scrape.html")
+
 
 @app.route("/login", methods=["GET", "POST"])
 def login():

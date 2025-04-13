@@ -1,28 +1,42 @@
 import scrapy
 
 
-class RecipespiderSpider(scrapy.Spider):
+class RecipeSpider(scrapy.Spider):
     name = "recipespider"
     allowed_domains = ["www.halfbakedharvest.com"]
-    start_urls = ["https://www.halfbakedharvest.com/honey-garlic-chicken/"]
 
+    def __init__(self, recipe_url, *args, *kwargs):
+        super(RecipeSpider, self).__init__(*args, *kwargs)
+        self.start_urls = [recipe_url]
+        
     def parse(self, response):
         
         ingredients = response.css('a.wprm-recipe-ingredient-link::text').getall()
         amounts = response.css('span.wprm-recipe-ingredient-amount::text').getall()
-        instructions = response.css('span::text').getall()
+        units = response.css('span.wprm-recipe-ingredient-unit::text').getall()
+        instructions = response.css('div.wprm-recipe-instruction-text span::text').getall()
+
+        # list of instructions
         instruct_list = []
+        ingredient_dict = {}
+
         # list of ingredients with their amounts
-        i_list = {}
+        
         for i in range(0, len(ingredients)):
-            try:
-                i_list[ingredients[i]] = amounts[i]
-            except:
-                i_list[ingredients[i]] = 0
+            ingredient = ingredients[i]
+            amount = (amounts[i] + " " + units[i]) if i < len(amounts) else None
+            ingredient_dict[ingredient] = amount
+            
         
         for entry in instructions:
-            if (entry[0] == 1 or entry[0] == 2 or entry[0] == 3 or entry[0] == 4 or entry[0] == 5 or entry[0] == 6 or entry[0] == 7) and len(entry) > 1:
-                instruct_list.append(entry)
+            instruct_list.append(entry)
+        yield { 
+            "title": response.css('h2.wprm-recipe-name wprm-block-text-normal::text')
+            "ingredients": ingredient_dict,
+            "instructions": instruct_list,
+            "source_url": response.url
+            }
 
-        yield [i_list, instruct_list]
+
+        
 
