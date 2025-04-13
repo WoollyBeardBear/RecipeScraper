@@ -2,9 +2,10 @@ from flask import Flask, render_template, session, request, redirect, flash
 from flask_session import Session
 from functools import wraps
 from werkzeug.security import check_password_hash, generate_password_hash
+import scrapy
 from scrapy.crawler import CrawlerProcess
 from scrapy.settings import Settings
-from recipescraper.recipescraper.spider.recipescraper import recipespider
+from recipescraper.recipescraper.spiders.RecipeSpider import RecipeSpider
 import datetime
 import sqlite3 as sql
 import time
@@ -34,15 +35,18 @@ def login_required(f):
 
 def run_spider(url):
     settings = Settings()
-
-    crawler = CrawlerProcess(settings)
+    print("NOW RUNNING SPIDER")
+    crawler_process = CrawlerProcess(settings)
     results = []
 
     def item_scraped(item, response, spider):
-        results.append(item)
+        print("GOT ITEM")
+        results.append(item)   
+    crawler = crawler_process.create_crawler(RecipeSpider)
     crawler.signals.connect(item_scraped, signal=scrapy.signals.item_scraped)
-    crawler.crawl(recipespider, recipe_url=url)
-    crawler.start()
+    crawler.crawl(crawler, recipe_url=url)
+    crawler_process.start()
+    crawler_process.stop()
     return results
 
 def store_recipe(recipe_data):
@@ -62,7 +66,7 @@ def store_recipe(recipe_data):
     cursor.execute('''
     INSERT OR REPLACE INTO recipes (user_id, url, title, ingredients, instructions) 
     VALUES (?, ?, ?, ?, ?)
-    ''', (session.get("user_id"), title_slug, recipe_data['source_url'], recipe_data.get('title'), json.dumps(recipe_data['ingredients']), json.dumps(recipe_data['instructions']))))
+    ''', (session.get("user_id"), title_slug, recipe_data['source_url'], recipe_data.get('title'), json.dumps(recipe_data['ingredients']), json.dumps(recipe_data['instructions'])))
     conn.commit()
     conn.close()
 
@@ -106,13 +110,15 @@ def recipe_display(slug):
     else:
         return "Recipe not found"
 
-@app.route("/add_recipe")
+@app.route("/add_recipe", methods=["GET", "POST"])
 @login_required
 def add_recipe():
     if request.method == "POST":
-        recipe_url = request.form["recipe_url"]
+        recipe_url = request.form.get("recipe_url")
+        print(f"Scraping data from {recipe_url}")
         scraped_data = run_spider(recipe_url)
         if scraped_data:
+            print("Data scraped, storing data")
             store_recipe(scraped_data)
             return render_template('recipe_display.html', recipe=scraped_data)
         else:

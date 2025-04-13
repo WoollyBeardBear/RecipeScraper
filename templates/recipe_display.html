@@ -5,5 +5,12 @@
 {% endblock %}
 
 {% block main %}
-<h1 {{recipe.}}
+<h1> {{ recipe.title }}</h1>
+<ul>
+    {{% for ingredient in recipe.ingredients %}}
+    <li>
+        {{ingredient}}
+    </li>
+    {{% endfor %}}
+</ul>
 {% endblock %}
