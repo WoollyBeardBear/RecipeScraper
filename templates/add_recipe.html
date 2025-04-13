@@ -1,7 +1,7 @@
 {% extends "layout.html" %}
 
 {% block title %}
-    Welcome
+    Add recipe
 {% endblock %}
 
 {% block main %}
@@ -10,12 +10,12 @@
     <p>Paste your recipe link below and we will scrape it for you!</p>
     <form>
         <div class="mb-3">
-            <input autofocus class="form-control mx-auto w-auto" name="recipe" placeholder="Recipe Link" type="url">
+            <input autofocus class="form-control mx-auto w-auto" name="recipe_url" placeholder="Recipe Link" type="url">
         </div>
         <button class="btn btn-primary" type="submit">Get Recipe</button>
     </form>
     <div>
-        
+    <!--  This will be a back up if I cannot get the scraper to work.
     </div>
     <form>
         <div class="mb-3">
@@ -23,6 +23,7 @@
             <input class="form-control mx-auto w-auto" name="recipe" placeholder="Copy and Paste Recipe" type="text">
         </div>
     </form>
+-->
     
 </body>
 {% endblock %}

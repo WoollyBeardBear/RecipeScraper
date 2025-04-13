@@ -8,6 +8,7 @@ from recipescraper.recipescraper.spider.recipescraper import recipespider
 import datetime
 import sqlite3 as sql
 import time
+import re
 
 app = Flask(__name__)
 
@@ -44,7 +45,27 @@ def run_spider(url):
     crawler.start()
     return results
 
-def store_recipe()
+def store_recipe(recipe_data):
+    conn.sqlite3.connect("users.db")
+    cursor = conn.cursor()
+    title_slug = slugify(recipe_data.get('title', 'untitled'))
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS recipes (
+            user_id INTEGER FOREIGN KEY,
+            slug TEXT UNIQUE,
+            url TEXT PRIMARY KEY,
+            title TEXT,
+            ingredients TEXT, --Store as JSON String
+            instructions TEXT --Store as JSON String
+    )
+    ''')
+    cursor.execute('''
+    INSERT OR REPLACE INTO recipes (user_id, url, title, ingredients, instructions) 
+    VALUES (?, ?, ?, ?, ?)
+    ''', (session.get("user_id"), title_slug, recipe_data['source_url'], recipe_data.get('title'), json.dumps(recipe_data['ingredients']), json.dumps(recipe_data['instructions']))))
+    conn.commit()
+    conn.close()
+
 
 @app.route("/")
 @login_required
@@ -52,6 +73,38 @@ def index():
     
     
     return render_template("index.html")
+
+def fetch_recipe_from_storage(recipe_slug):
+    conn = sqlite3.connect('recipes.db')
+    cursor = conn.cursor()
+    cursor.execute('''SELECT title, ingredients, instructions, url FROM recipes WHERE slug = ?''', (recipe_slug,))
+    result = cursor.fetchone()
+    conn.close()
+    if result:
+        return {
+            'title': result[0],
+            'ingredients': json.loads(result[1]),
+            'instructions': json.loads(result[2]),
+            'url': result[3]
+        }
+    return None
+
+
+def slugify(title):
+    """Converts a title into a URL-safe slug."""
+    title = title.lower().strip()
+    title = re.sub(r'[^\w\s-]', '', title)
+    title = re.sub(r'[-\s]+', '-', title)
+    return title
+
+@app.route("/recipe_display/<slug>")
+@login_required
+def recipe_display(slug):
+    recipe = fetch_recipe_from_storage(slug)
+    if recipe:
+        return render_template("recipe_display.html", recipe=recipe)
+    else:
+        return "Recipe not found"
 
 @app.route("/add_recipe")
 @login_required
@@ -61,7 +114,10 @@ def add_recipe():
         scraped_data = run_spider(recipe_url)
         if scraped_data:
             store_recipe(scraped_data)
-    return render_template("scrape.html")
+            return render_template('recipe_display.html', recipe=scraped_data)
+        else:
+            return "Scraping failed or no data found."
+    return render_template("add_recipe.html")
 
 
 @app.route("/login", methods=["GET", "POST"])
@@ -92,8 +148,6 @@ def login():
                     session["username"] = request.form.get("username")
                     return redirect("/")
                 else:
-                    print("WRONG USERNAME")
-                    print(user_info)
                     flash("username/password incorrect")
                     return render_template("login.html")
             except sql.Error as e:
