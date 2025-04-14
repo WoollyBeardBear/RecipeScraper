@@ -1,2 +1,3 @@
 # RecipeScraper
-My first non-tutorial project based off an idea my wife had. The idea is a website in which you can submit a link to a recipe and have the recipe minus all the non-sense.
+A recipe scraping web app using Python, Flask, Sqlite, and scrapy.
+Users can input a link to a recipe, the app will scrap the recipe and store it for them for future viewing!
