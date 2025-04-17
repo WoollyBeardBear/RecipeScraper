@@ -6,11 +6,20 @@
 
 {% block main %}
 <h1> {{ recipe.title }}</h1>
+<h2>Ingredients</h2>
 <ul>
-    {{% for ingredient in recipe.ingredients %}}
+    {% for ingredient, amount in recipe.ingredients.items() %}
     <li>
-        {{ingredient}}
+        {{ amount }} {{ ingredient }}
     </li>
-    {{% endfor %}}
+    {% endfor %}
+</ul>
+<h2>Instructions</h2>
+<ul>
+    {% for step in recipe.instructions %}
+    <li>
+        {{ step }}
+    </li>
+    {% endfor %}
 </ul>
 {% endblock %}

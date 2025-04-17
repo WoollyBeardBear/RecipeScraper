@@ -10,7 +10,7 @@ class RecipeSpider(scrapy.Spider):
         self.start_urls = [recipe_url]
 
     def parse(self, response):
-        print("running spider")
+        print("parsing")
         ingredients = response.css('a.wprm-recipe-ingredient-link::text').getall()
         amounts = response.css('span.wprm-recipe-ingredient-amount::text').getall()
         units = response.css('span.wprm-recipe-ingredient-unit::text').getall()
