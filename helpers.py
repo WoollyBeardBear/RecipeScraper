@@ -1,7 +1,7 @@
 import scrapy
 from scrapy.crawler import CrawlerProcess
 from scrapy.settings import Settings
-from recipescraper.recipescraper.spiders.RecipeSpider import RecipeSpider
+from recipescraper.recipescraper.spiders.recipespider import RecipeSpider
 import sqlite3 as sql
 import time
 import re
@@ -41,6 +41,7 @@ def run_spider(url):
     settings.set('ITEM_PIPELINES', {__name__ + '.ItemCollectorPipeline': 1})
     crawler_process.crawl(RecipeSpider, recipe_url=url)
     crawler_process.start()  # This blocks until the crawl is finished
+    crawler_process.stop()
     print("SPIDER FINISHED")
     return ItemCollectorPipeline.results
 

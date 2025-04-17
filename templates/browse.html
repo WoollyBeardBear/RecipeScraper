@@ -1,0 +1,19 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Browse/Search Recipes
+{% endblock %}
+
+{% block main %}
+<h1>Hello!</h1>
+<h2>Your saved recipes</h2>
+<ul>
+    <p>You have recipes!</p>
+    {% for recipe in recipes %}
+    <li>
+        <a href="/recipe_display/{{ recipe[0] }}">{{ recipe[2] }}</a> -->
+    </li>
+    {% endfor %}
+</ul>
+
+{% endblock %}

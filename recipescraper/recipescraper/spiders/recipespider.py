@@ -11,28 +11,31 @@ class RecipeSpider(scrapy.Spider):
 
     def parse(self, response):
         print("parsing")
-        ingredients = response.css('a.wprm-recipe-ingredient-link::text').getall()
-        amounts = response.css('span.wprm-recipe-ingredient-amount::text').getall()
-        units = response.css('span.wprm-recipe-ingredient-unit::text').getall()
+        recipe_container = response.css('div.wprm-recipe-container')
+
+        # Extracting ingredients
+        ingredients_data = {}
+        for item in recipe_container.css('li.wprm-recipe-ingredient'):
+            ingredient = item.css('a.wprm-recipe-ingredient-link::text').get()
+            amount = item.css('span.wprm-recipe-ingredient-amount::text').get()
+            unit = item.css('span.wprm-recipe-ingredient-unit::text').get()
+            print(f"Getting {ingredient}")
+            if ingredient:
+                full_amount = f"{amount} {unit}" if amount and unit else amount if amount else unit if unit else None
+                ingredients_data[ingredient] = full_amount
+
+        
         instructions = response.css('div.wprm-recipe-instruction-text span::text').getall()
 
         # list of instructions
         instruct_list = []
-        ingredient_dict = {}
-
-        # list of ingredients with their amounts
-        
-        for i in range(0, len(ingredients)):
-            ingredient = ingredients[i]
-            amount = (amounts[i] + " " + units[i]) if i < len(amounts) else None
-            ingredient_dict[ingredient] = amount
             
         
         for entry in instructions:
             instruct_list.append(entry)
         yield { 
             "title": response.css('h2.wprm-recipe-name::text').get(),
-            "ingredients": ingredient_dict,
+            "ingredients": ingredients_data,
             "instructions": instruct_list,
             "source_url": response.url
             }

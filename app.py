@@ -24,10 +24,29 @@ def index():
     
     return render_template("index.html")
 
+@app.route("/logout")
+@login_required
+def logout():
+    """ Log out user """
+    session.clear()
+    return redirect("/login")
+
+@app.route("/browse")
+@login_required
+def browse():
+    """ Browse recipes """
+    # Fetch all recipes from the database
+    with sql.connect(db) as conn:
+        cursor = conn.cursor()
+        cursor.execute("SELECT * FROM recipes WHERE user_id = ?", (session["user_id"],))
+        recipes = cursor.fetchall()
+    
+    return render_template("browse.html", recipes=recipes)
 
 @app.route("/recipe_display/<slug>")
 @login_required
 def recipe_display(slug):
+    """ Display a recipe """
     recipe = fetch_recipe_from_storage(slug)
     if recipe:
         return render_template("recipe_display.html", recipe=recipe)
@@ -37,6 +56,7 @@ def recipe_display(slug):
 @app.route("/add_recipe", methods=["GET", "POST"])
 @login_required
 def add_recipe():
+    """ Add a recipe """
     if request.method == "POST":
         recipe_url = request.form.get("recipe_url")
         print(f"Scraping data from {recipe_url}")
@@ -45,7 +65,7 @@ def add_recipe():
         if scraped_data:
             print(f"Data scraped, storing {scraped_data}")
             store_recipe(scraped_data)
-            return render_template('recipe_display.html', recipe=scraped_data)
+            return redirect("/browse")
         else:
             return "Scraping failed or no data found."
     return render_template("add_recipe.html")
