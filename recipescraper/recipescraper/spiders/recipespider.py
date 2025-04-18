@@ -30,9 +30,11 @@ class RecipeSpider(scrapy.Spider):
         # list of instructions
         instruct_list = []
             
-        
+        i = 1
         for entry in instructions:
+            entry = entry.lstrip(f"{i}. ")
             instruct_list.append(entry)
+            i += 1
         yield { 
             "title": response.css('h2.wprm-recipe-name::text').get(),
             "ingredients": ingredients_data,

@@ -41,7 +41,7 @@ def run_spider(url):
     settings.set('ITEM_PIPELINES', {__name__ + '.ItemCollectorPipeline': 1})
     crawler_process.crawl(RecipeSpider, recipe_url=url)
     crawler_process.start()  # This blocks until the crawl is finished
-    crawler_process.stop()
+    crawler_process.join()
     print("SPIDER FINISHED")
     return ItemCollectorPipeline.results
 

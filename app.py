@@ -17,6 +17,11 @@ Session(app)
 db = "users.db"
 
 
+@app.context_processor
+def inject_now():
+    """ Inject current time into templates """
+    return {"now" : datetime.datetime.now()}
+
 @app.route("/")
 @login_required
 def index():
