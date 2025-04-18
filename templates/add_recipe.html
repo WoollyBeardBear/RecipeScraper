@@ -5,25 +5,47 @@
 {% endblock %}
 
 {% block main %}
-<body class="--bs-body-bg">
-    <h1>Scrape a Recipe!</h1>
-    <p>Paste your recipe link below and we will scrape it for you!</p>
-    <form action="/add_recipe" method="post">
-        <div class="mb-3">
-            <input autofocus class="form-control mx-auto w-auto" name="recipe_url" placeholder="Recipe Link" type="url">
+<div class="container mt-4"> 
+    <div class="row justify-content-center"> 
+        <div class="col-md-8 col-lg-6"> 
+
+            <h1 class="text-center mb-3">Scrape a Recipe!</h1>
+            <p class="text-center text-muted mb-4">Paste your recipe link below and we will scrape it for you!</p>
+
+            {# Display flashed messages if available #}
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                        <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                            {{ message }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+
+
+            <form action="/add_recipe" method="post" class="mb-4">
+                <label for="recipe_url_input" class="form-label visually-hidden">Recipe Link</label>
+                <div class="input-group input-group-lg mb-3"> {# Use input group for potentially adding icons/buttons later #}
+                    <input id="recipe_url_input"
+                           autofocus
+                           class="form-control"
+                           name="recipe_url"
+                           placeholder="Paste recipe URL (e.g., https://...)"
+                           type="url"
+                           required> 
+                </div>
+                <div class="d-grid gap-2"> 
+                   <button class="btn btn-primary btn-lg" type="submit">Get Recipe</button>
+                </div>
+            </form>
+            <div class="alert alert-info small" role="alert">
+                 <strong>Note:</strong> This currently only works reliably on certain recipe sites (often WordPress-based).
+                 Examples: <a href="https://www.halfbakedharvest.com" class="alert-link" target="_blank" rel="noopener noreferrer">Half Baked Harvest</a> or
+                 <a href="https://tastesbetterfromscratch.com" class="alert-link" target="_blank" rel="noopener noreferrer">Tastes Better From Scratch</a>.
+            </div>
         </div>
-        <button class="btn btn-primary" type="submit">Get Recipe</button>
-    </form>
-    <p>*This currently only works on wordpress websites. A few examples are: <a href="https://www.halfbakedharvest.com">Half Baked Harvest</a> or <a href="https://tastesbetterfromscratch.com">Tastes Better From Scratch</a></p>
-    <!--  This will be a back up if I cannot get the scraper to work.
-    </div>
-    <form>
-        <div class="mb-3">
-            <p>OR copy and paste the ingredients and we will save this to your recipes</p>
-            <input class="form-control mx-auto w-auto" name="recipe" placeholder="Copy and Paste Recipe" type="text">
-        </div>
-    </form>
--->
-    
-</body>
+    </div> 
+</div> 
 {% endblock %}

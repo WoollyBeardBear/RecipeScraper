@@ -40,13 +40,37 @@ def logout():
 @login_required
 def browse():
     """ Browse recipes """
-    # Fetch all recipes from the database
-    with sql.connect(db) as conn:
-        cursor = conn.cursor()
-        cursor.execute("SELECT * FROM recipes WHERE user_id = ?", (session["user_id"],))
-        recipes = cursor.fetchall()
-    
-    return render_template("browse.html", recipes=recipes)
+    search_query = ""
+    recipes = []
+    try:
+        if "user_id" not in session:
+            return redirect("/login")
+        
+        with sql.connect(db) as conn:
+            conn.row_factory = sql.Row  # Enable row factory for dictionary-like access
+            cursor = conn.cursor()
+            search_query = request.args.get("search", "").strip()
+            print(f"--- DEBUG: search_query: {search_query} ---")
+            if search_query:
+                search_pattern = f"%{search_query}%"
+                cursor.execute("SELECT * FROM recipes WHERE user_id = ? AND LOWER(title) LIKE LOWER(?) ORDER BY title", (session["user_id"], search_pattern))
+
+            else:
+                cursor.execute("SELECT * FROM recipes WHERE user_id = ? ORDER BY title", (session["user_id"],))
+
+            recipes = cursor.fetchall()    
+            
+    except sql.Error as e:
+        print(f"Database error in browse route: {e}")
+        flash("An error occurred while retrieving recipes. Please try again later.", "danger")
+        recipes = [] 
+    except Exception as e:
+        print(f"An unexpected error occurred: {e}") # Catch other potential errors
+        flash("An unexpected error occurred.", "danger")
+        recipes = []
+
+
+    return render_template("browse.html", recipes=recipes, search_query=search_query)
 
 @app.route("/recipe_display/<slug>")
 @login_required
