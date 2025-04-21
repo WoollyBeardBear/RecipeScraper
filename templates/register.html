@@ -5,26 +5,74 @@
 {% endblock %}
 
 {% block main %}
-    <h1>Register Here for a free account with Recipe Scraper</h1>
-    <form action="/register" method="post">
-        <div class="mb-3">
-            <input autocomplete="off" autofocus class="form-control mx-auto w-auto" name="username" placeholder="Username" type="text">
-        </div>
-        <div class="mb-3">
-            <input class="form-control mx-auto w-auto" name="password" placeholder="Password" type="password">
-        </div>
-        <div class="mb-3">
-            <input class="form-control mx-auto w-auto" name="confirmation" placeholder="Confirm Password" type="password">
-        </div>
-        <button class="btn btn-primary" type="submit">Register</button>
-    </form>
-    {% with messages = get_flashed_messages() %}
-    {% if messages %}
-    <ul class=flashes>
-    {% for message in messages %}
-      <li>{{ message }}</li>
-    {% endfor %}
-    </ul>
-    {% endif %}
-    {% endwith %}
+<div class="container mt-5 mb-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-6 col-xl-5"> 
+
+            <div class="text-center mb-4">
+                <h1 class="h3 mb-3 fw-normal">Create Your Free Account</h1>
+                <p class="text-muted">Join Recipe Scraper to save and manage your recipes!</p>
+            </div>
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                        {% set alert_category = category | replace('error', 'danger') | default('info') %}
+                        <div class="alert alert-{{ alert_category }} alert-dismissible fade show" role="alert">
+                            {{ message }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+
+            <div class="card shadow-sm">
+                 <div class="card-body p-4">
+                     <h2 class="card-title text-center h4 mb-4">Register</h2>
+
+                     <form action="{{ url_for('register') }}" method="post" novalidate>
+                         <div class="mb-3">
+                             <label for="username" class="form-label">Username</label>
+                             <input id="username"
+                                    name="username"
+                                    type="text"
+                                    class="form-control"
+                                    placeholder="Choose a username"
+                                    autocomplete="username" 
+                                    autofocus
+                                    required>
+                         </div>
+                         <div class="mb-3">
+                             <label for="password" class="form-label">Password</label>
+                             <input id="password"
+                                    name="password"
+                                    type="password"
+                                    class="form-control"
+                                    placeholder="Create a password"
+                                    autocomplete="new-password"
+                                    required>
+                         </div>
+                         <div class="mb-4">
+                             <label for="confirmation" class="form-label">Confirm Password</label>
+                             <input id="confirmation"
+                                    name="confirmation"
+                                    type="password"
+                                    class="form-control"
+                                    placeholder="Re-enter your password"
+                                    autocomplete="new-password"
+                                    required>
+                         </div>
+                         <div class="d-grid"> 
+                              <button class="btn btn-primary btn-lg" type="submit">Register</button>
+                         </div>
+                     </form>
+                 </div>
+            </div> 
+
+             <p class="text-center text-muted mt-4">
+                 Already have an account? <a href="{{ url_for('login') }}">Log in here</a>.
+             </p>
+
+         </div> 
+     </div> 
+ </div> 
 {% endblock %}

@@ -115,7 +115,6 @@ def login():
             flash("Must include password")
             return render_template("login.html")
         
-        # use with to handle connection to DB
         with sql.connect(db) as conn:
             cursor = conn.cursor()
             cursor.execute("SELECT * FROM users WHERE username = ?", (username,))

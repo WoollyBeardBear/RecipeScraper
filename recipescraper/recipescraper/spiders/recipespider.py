@@ -21,7 +21,7 @@ class RecipeSpider(scrapy.Spider):
             unit = item.css('span.wprm-recipe-ingredient-unit::text').get()
             print(f"Getting {ingredient}")
             if ingredient:
-                full_amount = f"{amount} {unit}" if amount and unit else amount if amount else unit if unit else None
+                full_amount = f"{amount} {unit}" if amount and unit else amount if amount else unit if unit else " "
                 ingredients_data[ingredient] = full_amount
 
         

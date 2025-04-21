@@ -5,14 +5,29 @@
 {% endblock %}
 
 {% block main %}
-<body class="--bs-body-bg">
-    <h1>Recipe Scraper Home</h1>
-    <a href="/add_recipe">
-        <button class="btn btn-primary">Add a Recipe</button>
-    </a>
-    <a href="/browse">
-        <button class="btn btn-primary">Browse Recipes</button>
-    </a>
-    
-</body>
+<div class="container d-flex flex-column justify-content-center align-items-center text-center" style="min-height: 70vh;">
+
+    <h1 class="display-4 mb-3">Welcome to Recipe Scraper</h1>
+
+    <p class="lead text-muted mb-4">
+        Easily save and browse recipes from your favorite websites.
+    </p>
+
+    <div>
+        <a href="{{ url_for('add_recipe') }}" class="btn btn-primary btn-lg me-md-3 mb-3 mb-md-0">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-plus-circle-fill me-1" viewBox="0 0 16 16">
+              <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0M8.5 4.5a.5.5 0 0 0-1 0v3h-3a.5.5 0 0 0 0 1h3v3a.5.5 0 0 0 1 0v-3h3a.5.5 0 0 0 0-1h-3z"/>
+            </svg>
+            Add New Recipe
+        </a>
+        <a href="{{ url_for('browse') }}" class="btn btn-outline-secondary btn-lg">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-collection-fill me-1" viewBox="0 0 16 16">
+              <path d="M0 13a1.5 1.5 0 0 0 1.5 1.5h13A1.5 1.5 0 0 0 16 13V6a1.5 1.5 0 0 0-1.5-1.5h-13A1.5 1.5 0 0 0 0 6z"/>
+              <path d="M2 3a.5.5 0 0 0 .5.5h11a.5.5 0 0 0 0-1h-11A.5.5 0 0 0 2 3m2-2a.5.5 0 0 0 .5.5h7a.5.5 0 0 0 0-1h-7A.5.5 0 0 0 4 1"/>
+            </svg>
+            Browse Saved Recipes
+        </a>
+    </div>
+
+</div>
 {% endblock %}
