@@ -51,7 +51,7 @@ def browse():
             return redirect("/login")
         
         
-        conn.get_db()
+        conn = get_db() # Connect to the database
         cursor = conn.cursor(cursor_factory=DictCursor)
         search_query = request.args.get("search", "").strip()
         if search_query:
