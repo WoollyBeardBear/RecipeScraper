@@ -194,7 +194,7 @@ def register():
                 conn.commit()
                 conn.close()
                 return redirect("/")
-    except sql.Error as e:
+    except psycopg2.Error as e:
         flash("Error registering please try again")
         print(e)
         return redirect("/register")

@@ -12,7 +12,7 @@ from flask import Flask, render_template, session, request, redirect, flash
 from flask_session import Session
 from psycopg2.extras import DictCursor
 
-
+DATABASE_URL = os.environ.get("DATABASE_URL")
 
 def login_required(f):
     """" 
