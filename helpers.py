@@ -61,11 +61,6 @@ def store_recipe(recipe_data):
         cursor.execute('''
             INSERT INTO recipes (url, title, slug, ingredients, instructions, user_id)
             VALUES (%s, %s, %s, %s, %s, %s)
-            ON CONFLICT (slug, user_id) DO UPDATE SET
-                url = EXCLUDED.url,
-                title = EXCLUDED.title,
-                ingredients = EXCLUDED.ingredients,
-                instructions = EXCLUDED.instructions
         ''', (recipe_data[0].get('source_url'), recipe_data[0].get('title'), title_slug, json.dumps(recipe_data[0].get('ingredients')), json.dumps(recipe_data[0].get('instructions')), session.get("user_id")))
         conn.commit()
     except psycopg2.Error as e:
