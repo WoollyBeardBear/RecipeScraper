@@ -54,12 +54,13 @@ def browse():
         conn = get_db() # Connect to the database
         cursor = conn.cursor(cursor_factory=DictCursor)
         search_query = request.args.get("search", "").strip()
+        user_id = int(session["user_id"])
         if search_query:
             search_pattern = f"%{search_query}%"
-            cursor.execute("SELECT * FROM recipes WHERE user_id = %s AND LOWER(title) LIKE LOWER(%s) ORDER BY title", (session["user_id"], search_pattern))
+            cursor.execute("SELECT * FROM recipes WHERE user_id = %s AND LOWER(title) LIKE LOWER(%s) ORDER BY title", (user_id, search_pattern))
 
         else:
-            cursor.execute("SELECT * FROM recipes WHERE user_id = %s ORDER BY title", (session["user_id"],))
+            cursor.execute("SELECT * FROM recipes WHERE user_id = %s ORDER BY title", (user_id,))
 
         recipes = cursor.fetchall()    
             
