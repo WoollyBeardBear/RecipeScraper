@@ -2,10 +2,12 @@ from flask import Flask, render_template, session, request, redirect, flash
 from flask_session import Session
 from werkzeug.security import check_password_hash, generate_password_hash
 from helpers import *
+from psycopg2.extras import DictCursor
 import datetime
-import sqlite3 as sql
 import time
 import re
+import psycopg2
+import os
 
 
 app = Flask(__name__)
@@ -14,7 +16,7 @@ app.config["SESSION_PERMANENT"] = False
 app.config["SESSION_TYPE"] = "filesystem"
 Session(app)
 
-db = "database.db"
+DATABASE_URL = os.environ.get("DATABASE_URL")
 
 
 @app.context_processor
@@ -42,32 +44,40 @@ def browse():
     """ Browse recipes """
     search_query = ""
     recipes = []
+    conn = None
+    cursor = None
     try:
         if "user_id" not in session:
             return redirect("/login")
         
-        with sql.connect(db) as conn:
-            conn.row_factory = sql.Row  # Enable row factory for dictionary-like access
-            cursor = conn.cursor()
-            search_query = request.args.get("search", "").strip()
-            print(f"--- DEBUG: search_query: {search_query} ---")
-            if search_query:
-                search_pattern = f"%{search_query}%"
-                cursor.execute("SELECT * FROM recipes WHERE user_id = ? AND LOWER(title) LIKE LOWER(?) ORDER BY title", (session["user_id"], search_pattern))
+        
+        conn.get_db()
+        cursor = conn.cursor(cursor_factory=DictCursor)
+        search_query = request.args.get("search", "").strip()
+        if search_query:
+            search_pattern = f"%{search_query}%"
+            cursor.execute("SELECT * FROM recipes WHERE user_id = %s AND LOWER(title) LIKE LOWER(%s) ORDER BY title", (session["user_id"], search_pattern))
 
-            else:
-                cursor.execute("SELECT * FROM recipes WHERE user_id = ? ORDER BY title", (session["user_id"],))
+        else:
+            cursor.execute("SELECT * FROM recipes WHERE user_id = %s ORDER BY title", (session["user_id"],))
 
-            recipes = cursor.fetchall()    
+        recipes = cursor.fetchall()    
             
-    except sql.Error as e:
+    except psycopg2.Error as e:
         print(f"Database error in browse route: {e}")
         flash("An error occurred while retrieving recipes. Please try again later.", "danger")
         recipes = [] 
+        if conn:
+            conn.rollback()
     except Exception as e:
         print(f"An unexpected error occurred: {e}") # Catch other potential errors
         flash("An unexpected error occurred.", "danger")
         recipes = []
+    finally:
+        if cursor:
+            cursor.close()
+        if conn:
+            conn.close()
 
 
     return render_template("browse.html", recipes=recipes, search_query=search_query)
@@ -105,6 +115,8 @@ def login():
     """ Log In """
     #clear any current user info
     session.clear()
+    conn = None
+    cursor = None
     if request.method == "POST":
         username = request.form.get("username")
         password = request.form.get("password")
@@ -115,24 +127,35 @@ def login():
             flash("Must include password")
             return render_template("login.html")
         
-        with sql.connect(db) as conn:
-            cursor = conn.cursor()
-            cursor.execute("SELECT * FROM users WHERE username = ?", (username,))
-            
-            try: 
-                user_info = cursor.fetchone()
+        conn = get_db()
+        cursor = conn.cursor(cursor_factory=DictCursor)
+        cursor.execute("SELECT * FROM users WHERE username = %s", (username,))
+        
+        try: 
+            user_info = cursor.fetchone()
+            if user_info:
                 print(check_password_hash(user_info[2], password))
                 if check_password_hash(user_info[2], password):
                     session["user_id"] = user_info[0]
-                    session["username"] = request.form.get("username")
+                    session["username"] = username
                     return redirect("/")
                 else:
                     flash("username/password incorrect")
                     return render_template("login.html")
-            except sql.Error as e:
-                print(e)
+            else:
                 flash("username/password incorrect")
                 return render_template("login.html")
+        except psycopg2.Error as e:
+            print(e)
+            flash("An error occurred please try again", "danger")
+            if conn:
+                conn.rollback()
+
+        finally:
+            if cursor:
+                cursor.close()
+            if conn:
+                conn.close()
     return render_template("login.html")
 
 @app.route("/register", methods=["GET", "POST"])
@@ -147,37 +170,33 @@ def register():
                 flash("Must include username")
                 return render_template("register.html")
             # set up database
-            conn = sql.connect(db)
-            cursor = conn.cursor()
+            conn = get_db()
+            cursor = conn.cursor(cursor_factory=DictCursor)
             # Query for username
             try:
-                cursor.execute("SELECT username FROM users WHERE username = ?", (username,))
+                cursor.execute("SELECT username FROM users WHERE username = %s", (username,))
                 if username == cursor.fetchone()[0]:
                     flash("username already exists")
-                    time.sleep(0.5)
                     return render_template("register.html")
             except:
                 pass1 = request.form.get("password")
                 conf = request.form.get("confirmation")
                 if not pass1 or not conf:
                     flash("Must inlcude password and confrimation")
-                    time.sleep(0.5)
                     return render_template("register.html")
                 if pass1 != conf:
                     flash("Must password and confirmation must match")
-                    time.sleep(0.5)
                     return render_template("register.html")
                 # hash the password for secure storage
                 pass_hash = generate_password_hash(pass1, method='scrypt', salt_length=16)
                 # insert username and password into 
-                cursor.execute("INSERT INTO users (username, pass_hash) VALUES (?, ?)", (username, pass_hash))
+                cursor.execute("INSERT INTO users (username, pass_hash) VALUES (%s, %s)", (username, pass_hash))
                 conn.commit()
                 conn.close()
                 return redirect("/")
     except sql.Error as e:
         flash("Error registering please try again")
         print(e)
-        time.sleep(0.5)
         return redirect("/register")
     
     return render_template("register.html")

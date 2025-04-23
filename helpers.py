@@ -45,43 +45,62 @@ def run_spider(url):
     print("SPIDER FINISHED")
     return ItemCollectorPipeline.results
 
+def get_db():
+    conn = psycopg2.connect(DATABASE_URL)  
+    return conn
+
 def store_recipe(recipe_data):
-    conn = sql.connect('users.db')  # Connect to the recipes database
-    cursor = conn.cursor()
-    title_slug = slugify(recipe_data[0].get('title', 'untitled'))
-    # cursor.execute('''
-    #     CREATE TABLE IF NOT EXISTS recipes (
-    #         slug TEXT UNIQUE,
-    #         url TEXT PRIMARY KEY,
-    #         title TEXT,
-    #         ingredients TEXT, --Store as JSON String
-    #         instructions TEXT, --Store as JSON String
-    #         user_id INTEGER,
-    #         FOREIGN KEY (user_id) REFERENCES users(user_id)
-    # )
-    # ''')
-    cursor.execute('''
-    INSERT OR REPLACE INTO recipes (url, title, slug, ingredients, instructions, user_id)
-    VALUES (?, ?, ?, ?, ?, ?)
-    ''', (recipe_data[0].get('source_url'), recipe_data[0].get('title'), title_slug, json.dumps(recipe_data[0].get('ingredients')), json.dumps(recipe_data[0].get('instructions')), session.get("user_id")))
-    conn.commit()
-    conn.close()
+     conn = None
+    cursor = None
+    try:
+        conn = get_db()
+        cursor = conn.cursor()
+        title_slug = slugify(recipe_data[0].get('title', 'untitled'))
+        cursor.execute('''
+            INSERT INTO recipes (url, title, slug, ingredients, instructions, user_id)
+            VALUES (%s, %s, %s, %s, %s, %s)
+            ON CONFLICT (slug, user_id) DO UPDATE SET
+                url = EXCLUDED.url,
+                title = EXCLUDED.title,
+                ingredients = EXCLUDED.ingredients,
+                instructions = EXCLUDED.instructions
+        ''', (recipe_data[0].get('source_url'), recipe_data[0].get('title'), title_slug, json.dumps(recipe_data[0].get('ingredients')), json.dumps(recipe_data[0].get('instructions')), session.get("user_id")))
+        conn.commit()
+    except psycopg2.Error as e:
+        print(f"Database error in store_recipe: {e}")
+        if conn:
+            conn.rollback()
+    finally:
+        if cursor:
+            cursor.close()
+        if conn:
+            conn.close()
 
 
 def fetch_recipe_from_storage(recipe_slug):
-    conn = sql.connect('users.db')
-    cursor = conn.cursor()
-    cursor.execute('''SELECT title, ingredients, instructions, url FROM recipes WHERE slug = ?''', (recipe_slug,))
-    result = cursor.fetchone()
-    conn.close()
-    if result:
-        return {
-            'title': result[0],
-            'ingredients': json.loads(result[1]),
-            'instructions': json.loads(result[2]),
-            'url': result[3]
-        }
-    return None
+    conn = None
+    cursor = None
+    recipe_data = None
+    try:
+        conn = get_db()
+        cursor = conn.cursor(cursor_factory=DictCursor)
+        cursor.execute('''SELECT title, ingredients, instructions, url FROM recipes WHERE slug = %s''', (recipe_slug,))
+        result = cursor.fetchone()
+        if result:
+            return {
+                'title': result[0],
+                'ingredients': json.loads(result[1]),
+                'instructions': json.loads(result[2]),
+                'url': result[3]
+            }
+    except psycopg2.Error as e:
+        print(f"Database error in fetch_recipe_from_storage: {e}")
+    finally:
+        if cursor:
+            cursor.close()
+        if conn:
+            conn.close()
+    return recipe_data
 
 
 def slugify(title):

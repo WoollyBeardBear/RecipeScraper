@@ -9,6 +9,7 @@ flask_session/
 
 # user database
 users.db
+data/
 
 # C extensions
 *.so
