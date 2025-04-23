@@ -2,13 +2,15 @@ import scrapy
 from scrapy.crawler import CrawlerProcess
 from scrapy.settings import Settings
 from recipescraper.recipescraper.spiders.recipespider import RecipeSpider
-import sqlite3 as sql
+import psycopg2
+import os
 import time
 import re
 import json
 from functools import wraps
 from flask import Flask, render_template, session, request, redirect, flash
 from flask_session import Session
+from psycopg2.extras import DictCursor
 
 
 
