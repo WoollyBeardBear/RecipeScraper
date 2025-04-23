@@ -50,7 +50,7 @@ def get_db():
     return conn
 
 def store_recipe(recipe_data):
-     conn = None
+    conn = None
     cursor = None
     try:
         conn = get_db()
