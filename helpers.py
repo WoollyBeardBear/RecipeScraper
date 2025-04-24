@@ -15,6 +15,7 @@ from scrapy.crawler import CrawlerRunner
 from twisted.internet import reactor
 from twisted.internet.defer import Deferred
 from scrapy.utils.project import get_project_settings
+import threading
 
 DATABASE_URL = os.environ.get("DATABASE_URL")
 
