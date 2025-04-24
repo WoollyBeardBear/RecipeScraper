@@ -33,8 +33,14 @@ def login_required(f):
 
 
 # Global runner and reactor state
-runner = CrawlerRunner(get_project_settings())
 crawler_thread_started = False
+from scrapy.settings import Settings
+
+runner = CrawlerRunner(Settings({
+    'ITEM_PIPELINES': {
+        __name__ + '.ItemCollectorPipeline': 1
+    }
+}))
 
 def start_crawler_reactor():
     """Starts the Twisted reactor in a background thread if not already running."""
@@ -56,6 +62,7 @@ process = CrawlerProcess()
 settings = Settings()
 settings.set('ITEM_PIPELINES', {__name__ + '.ItemCollectorPipeline': 1})
 process.settings = settings
+
 
 
 def run_spider(url):

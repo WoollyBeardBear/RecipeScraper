@@ -10,7 +10,7 @@ class RecipeSpider(scrapy.Spider):
         self.start_urls = [recipe_url]
 
     def parse(self, response):
-        print("parsing")
+        print("Spider parsing response:", response.url)
         recipe_container = response.css('div.wprm-recipe-container')
 
         # Extracting ingredients

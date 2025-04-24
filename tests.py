@@ -7,7 +7,6 @@ from flask_session import Session
 class TestTests(unittest.TestCase):
     def test_runsidey(self):
         url = "https://www.halfbakedharvest.com/baked-frosted-chocolate-donuts/"
-        start_crawler()
         print("RUNNING SPIDER")
         result = scrape_and_store(url)
 
