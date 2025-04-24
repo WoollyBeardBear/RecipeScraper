@@ -43,9 +43,9 @@ process.settings = settings
 
 def run_spider(url):
     ItemCollectorPipeline.results = []  # Reset results for each run
-    process.crawl(RecipeSpider, recipe_url=url)
+    result = process.crawl(RecipeSpider, recipe_url=url)
     print("SPIDER FINISHED")
-    return ItemCollectorPipeline.results
+    return result
 
 def start_crawler():
     process.start() 
@@ -53,6 +53,28 @@ def start_crawler():
 def get_db():
     conn = psycopg2.connect(DATABASE_URL)  
     return conn
+
+def scrape_and_store(url):
+    """Runs the spider and stores the data using callbacks."""
+    deferred = run_spider(url)
+    deferred.addCallback(process_spider_output)
+    deferred.addErrback(handle_scraping_error)
+
+def get_scraped_items():
+    return ItemCollectorPipeline.results
+
+def process_spider_output(spider_output):
+    """Callback to process the output after the spider finishes."""
+    results = get_scraped_items()
+    if results:
+        print(f"Scraped data: {results}")
+        store_recipe(results[0]) 
+    else:
+        print("No recipe data scraped.")
+
+def handle_scraping_error(failure):
+    """Callback to handle errors during scraping."""
+    print(f"Scraping failed for URL: {failure.getErrorMessage()}")
 
 def store_recipe(recipe_data):
     conn = None
@@ -109,3 +131,4 @@ def slugify(title):
     title = re.sub(r'[^\w\s-]', '', title)
     title = re.sub(r'[-\s]+', '-', title)
     return title
+

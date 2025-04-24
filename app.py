@@ -8,6 +8,7 @@ import time
 import re
 import psycopg2
 import os
+import threading
 
 
 app = Flask(__name__)
@@ -17,18 +18,16 @@ app.config["SESSION_TYPE"] = "filesystem"
 Session(app)
 
 DATABASE_URL = os.environ.get("DATABASE_URL")
-
-
 @app.context_processor
 def inject_now():
     """ Inject current time into templates """
     return {"now" : datetime.datetime.now()}
 
+
 @app.route("/")
 @login_required
 def index():
-    
-    
+    """ Home page """
     return render_template("index.html")
 
 @app.route("/logout")
@@ -100,15 +99,16 @@ def add_recipe():
     if request.method == "POST":
         recipe_url = request.form.get("recipe_url")
         print(f"Scraping data from {recipe_url}")
-        scraped_data = run_spider(recipe_url)
-        time.sleep(1)
-        if scraped_data:
-            print(f"Data scraped, storing {scraped_data}")
-            store_recipe(scraped_data)
-            return redirect("/browse")
-        else:
-            return "Scraping failed or no data found."
+        thread = threading.Thread(target=scrape_and_store, args=(recipe_url,))
+        thread.start()
+        return render_template("scraping_in_progress.html", url=recipe_url)
     return render_template("add_recipe.html")
+
+@app.route("/scraping_in_progress/<path:url>")
+@login_required
+def scraping_in_progress(url):
+    """Displays a page indicating that scraping is in progress."""
+    return render_template("scraping_in_progress.html", url=url)
 
 
 @app.route("/login", methods=["GET", "POST"])
@@ -202,3 +202,13 @@ def register():
     
     return render_template("register.html")
 
+if __name__ == '__main__':
+    def run_crawler():
+        start_crawler()
+        reactor.run(installSignalHandlers=False)
+
+    crawler_thread = threading.Thread(target=run_crawler)
+    crawler_thread.daemon = True
+    crawler_thread.start()
+
+    app.run(debug=True)
