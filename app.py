@@ -201,14 +201,3 @@ def register():
         return redirect("/register")
     
     return render_template("register.html")
-
-if __name__ == '__main__':
-    def run_crawler():
-        start_crawler()
-        reactor.run(installSignalHandlers=False)
-
-    crawler_thread = threading.Thread(target=run_crawler)
-    crawler_thread.daemon = True
-    crawler_thread.start()
-
-    app.run(debug=True)

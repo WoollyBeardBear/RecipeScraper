@@ -11,6 +11,10 @@ from functools import wraps
 from flask import Flask, render_template, session, request, redirect, flash
 from flask_session import Session
 from psycopg2.extras import DictCursor
+from scrapy.crawler import CrawlerRunner
+from twisted.internet import reactor
+from twisted.internet.defer import Deferred
+from scrapy.utils.project import get_project_settings
 
 DATABASE_URL = os.environ.get("DATABASE_URL")
 
@@ -25,6 +29,18 @@ def login_required(f):
             return redirect("/login")
         return f(*args, **kwargs)
     return decorated_function
+
+
+# Global runner and reactor state
+runner = CrawlerRunner(get_project_settings())
+crawler_thread_started = False
+
+def start_crawler_reactor():
+    """Starts the Twisted reactor in a background thread if not already running."""
+    global crawler_thread_started
+    if not crawler_thread_started:
+        crawler_thread_started = True
+        threading.Thread(target=reactor.run, kwargs={'installSignalHandlers': False}, daemon=True).start()
 
 class ItemCollectorPipeline:
     results = []  # Class-level list to store results
@@ -42,10 +58,12 @@ process.settings = settings
 
 
 def run_spider(url):
-    ItemCollectorPipeline.results = []  # Reset results for each run
-    result = process.crawl(RecipeSpider, recipe_url=url)
-    print("SPIDER FINISHED")
-    return result
+    """Runs the Scrapy spider using the global runner and reactor."""
+    start_crawler_reactor()
+    ItemCollectorPipeline.results = []  # Reset
+    deferred = runner.crawl(RecipeSpider, recipe_url=url)
+    deferred.addCallback(process_spider_output)
+    deferred.addErrback(handle_scraping_error)
 
 def start_crawler():
     process.start() 
@@ -55,26 +73,23 @@ def get_db():
     return conn
 
 def scrape_and_store(url):
-    """Runs the spider and stores the data using callbacks."""
-    deferred = run_spider(url)
-    deferred.addCallback(process_spider_output)
-    deferred.addErrback(handle_scraping_error)
+    print(f"Starting scrape for: {url}")
+    run_spider(url)
 
 def get_scraped_items():
     return ItemCollectorPipeline.results
 
-def process_spider_output(spider_output):
-    """Callback to process the output after the spider finishes."""
+def process_spider_output(_):
     results = get_scraped_items()
     if results:
         print(f"Scraped data: {results}")
-        store_recipe(results[0]) 
+        store_recipe(results[0])
     else:
         print("No recipe data scraped.")
 
 def handle_scraping_error(failure):
-    """Callback to handle errors during scraping."""
-    print(f"Scraping failed for URL: {failure.getErrorMessage()}")
+    print(f"Scraping failed: {failure.getErrorMessage()}")
+
 
 def store_recipe(recipe_data):
     conn = None
