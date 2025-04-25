@@ -36,18 +36,19 @@ def login_required(f):
 crawler_thread_started = False
 from scrapy.settings import Settings
 
+
 runner = CrawlerRunner(Settings({
     'ITEM_PIPELINES': {
         __name__ + '.ItemCollectorPipeline': 1
     }
 }))
 
+
 def start_crawler_reactor():
     """Starts the Twisted reactor in a background thread if not already running."""
-    global crawler_thread_started
-    if not crawler_thread_started:
-        crawler_thread_started = True
+    if not reactor.running:
         threading.Thread(target=reactor.run, kwargs={'installSignalHandlers': False}, daemon=True).start()
+
 
 class ItemCollectorPipeline:
     results = []  # Class-level list to store results
@@ -57,12 +58,6 @@ class ItemCollectorPipeline:
         ItemCollectorPipeline.results.append(item)
         return item
 
-# Spider settings
-process = CrawlerProcess()
-settings = Settings()
-settings.set('ITEM_PIPELINES', {__name__ + '.ItemCollectorPipeline': 1})
-process.settings = settings
-
 
 
 def run_spider(url):
@@ -70,6 +65,8 @@ def run_spider(url):
     start_crawler_reactor()
     ItemCollectorPipeline.results = []  # Reset
     deferred = runner.crawl(RecipeSpider, recipe_url=url)
+    print(f"Running spider for URL: {url}")
+    print(f"{deferred}")
     deferred.addCallback(process_spider_output)
     deferred.addErrback(handle_scraping_error)
 

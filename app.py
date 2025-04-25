@@ -99,8 +99,11 @@ def add_recipe():
     if request.method == "POST":
         recipe_url = request.form.get("recipe_url")
         print(f"Scraping data from {recipe_url}")
-        thread = threading.Thread(target=scrape_and_store, args=(recipe_url,))
-        thread.start()
+        if not recipe_url:
+            flash("Must include a recipe URL")
+            return render_template("add_recipe.html")
+        
+
         return render_template("scraping_in_progress.html", url=recipe_url)
     return render_template("add_recipe.html")
 
