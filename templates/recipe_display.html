@@ -43,7 +43,7 @@
                     <div class="card-body p-0">
                         
                         <ul class="list-group list-group-flush">
-                            {% for ingredient, amount in recipe.ingredients.items() %}
+                            {% for ingredient in recipe.ingredients %}
                             
                             <li class="list-group-item py-2 px-3 border-0"> {# Removed border for cleaner look with checkboxes #}
                                  <div class="form-check">
@@ -56,8 +56,7 @@
 
                                      {# Label associated with the checkbox (clicking text toggles check) #}
                                      <label class="form-check-label" for="ingredient-check-{{ loop.index0 }}">
-                                         
-                                         <span class="fw-bold me-2">{{ amount }}</span> {{ ingredient | capitalize }}
+                                         {{ ingredient | capitalize }}
                                      </label>
                                  </div>
                             </li>
@@ -91,7 +90,7 @@
 
         </div> 
 
-        {# Optional: Add action buttons (Edit/Delete) if applicable #}
+        {# In the future I may add an edit recipe page #}
         {# Assuming you have recipe.id available #}
         {#
         <div class="mt-4 text-end border-top pt-3">

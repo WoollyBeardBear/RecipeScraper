@@ -8,7 +8,6 @@ from functools import wraps
 from flask import Flask, render_template, session, request, redirect, flash
 from flask_session import Session
 from psycopg2.extras import DictCursor
-
 from recipe_scrapers import scrape_me
 import requests
 from recipe_scrapers import scrape_html
@@ -26,9 +25,6 @@ def login_required(f):
             return redirect("/login")
         return f(*args, **kwargs)
     return decorated_function
-
-
-
 
 def get_db():
     conn = psycopg2.connect(DATABASE_URL)  
