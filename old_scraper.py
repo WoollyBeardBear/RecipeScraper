@@ -1,3 +1,14 @@
+import scrapy
+from scrapy.crawler import CrawlerProcess
+from scrapy.settings import Settings
+from recipescraper.recipescraper.spiders.recipespider import RecipeSpider
+
+from scrapy.crawler import CrawlerRunner
+from twisted.internet import reactor
+from twisted.internet.defer import Deferred
+from scrapy.utils.project import get_project_settings
+import threading
+
 # Global runner and reactor state
 crawler_thread_started = False
 from scrapy.settings import Settings

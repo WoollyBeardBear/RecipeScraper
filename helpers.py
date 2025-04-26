@@ -1,7 +1,4 @@
-import scrapy
-from scrapy.crawler import CrawlerProcess
-from scrapy.settings import Settings
-from recipescraper.recipescraper.spiders.recipespider import RecipeSpider
+
 import psycopg2
 import os
 import time
@@ -11,11 +8,7 @@ from functools import wraps
 from flask import Flask, render_template, session, request, redirect, flash
 from flask_session import Session
 from psycopg2.extras import DictCursor
-from scrapy.crawler import CrawlerRunner
-from twisted.internet import reactor
-from twisted.internet.defer import Deferred
-from scrapy.utils.project import get_project_settings
-import threading
+
 from recipe_scrapers import scrape_me
 import requests
 from recipe_scrapers import scrape_html
