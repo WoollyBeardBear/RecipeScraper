@@ -3,6 +3,7 @@ from flask_session import Session
 from werkzeug.security import check_password_hash, generate_password_hash
 from helpers import *
 from psycopg2.extras import DictCursor
+from new_scraper import *
 import datetime
 import time
 import re
@@ -102,7 +103,9 @@ def add_recipe():
         if not recipe_url:
             flash("Must include a recipe URL")
             return render_template("add_recipe.html")
-        
+        scraped_data = new_scraper(recipe_url)
+        if scraped_data:
+            store_recipe(scraped_data)
 
         return render_template("scraping_in_progress.html", url=recipe_url)
     return render_template("add_recipe.html")

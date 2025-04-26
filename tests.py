@@ -20,13 +20,8 @@ class TestTests(unittest.TestCase):
         
     def test_new_scraper(self):
         url = "https://www.allrecipes.com/recipe/158968/spinach-and-feta-turkey-burgers/"
-        html = requests.get(url).text # retrieves the recipe webpage HTML
-        scraper = scrape_html(html, org_url=url)
-
-        # Extract recipe information
-        print(scraper.title())
-        print(scraper.instructions())
-        print(scraper.ingredients())
+        scraped_data = new_scraper(url)
+        print("ingredients", process_instructions(scraped_data.instructions()))
         
 
 
