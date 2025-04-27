@@ -20,8 +20,11 @@
                     </button>
                     <div class="collapse navbar-collapse" id="navbarContent">
                         {% if session["user_id"] %}
-                            <ul class="navbar-nav me-auto mb-2 mb-lg-0"> <li class="nav-item"><a class="nav-link" href="/add_recipe">Add Recipe</a></li>
+                            <ul class="navbar-nav me-auto mb-2 mb-lg-0"> 
+                                <li class="nav-item"><a class="nav-link" href="/add_recipe">Add Recipe Via Link</a></li>
+                                <li class="nav-item"><a class="nav-link" href="/manual_add">Add Recipe Manually</a></li>
                                 <li class="nav-item"><a class="nav-link" href="/browse">Browse Recipes</a></li>
+                                
                             </ul>
                             <ul class="navbar-nav ms-auto mb-2 mb-lg-0"> <li class="nav-item"><a class="nav-link" href="/logout">Log Out</a></li>
                             </ul>
