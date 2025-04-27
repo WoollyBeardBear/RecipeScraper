@@ -83,7 +83,6 @@ def browse():
 
     return render_template("browse.html", recipes=recipes, search_query=search_query)
 
-# ADD manual recipe entry 
 
 @app.route("/recipe_display/<slug>")
 @login_required
@@ -101,12 +100,16 @@ def manual_add():
     """ Add a manually recipe """
     if request.method == "POST":
         title = request.form.get("recipe_title")
-        ingredients = request.form.get("recipe_ingredients").split("\n")
-        instructions = request.form.get("recipe_instructions").split("\n").
+        ingredients = request.form.get("recipe_ingredients")
+        ingredients = ingredients.split("\n")
+        instructions = request.form.get("recipe_instructions")
+        instructions = instructions.split("\n")
+        url = request.form.get("recipe_url")
         recipe = {
             "title": title,
             "ingredients": ingredients,
             "instructions": instructions
+            "url": url if url else None
         }
         store_manual_recipe(recipe)
         return render_template("scraping_in_progress.html", success=True, error_message=None)

@@ -43,10 +43,11 @@ def store_manual_recipe(recipe_data):
         conn = get_db()
         cursor = conn.cursor()
         title_slug = slugify(recipe_data["title"])
+        url = recipe_data["url"]
         cursor.execute('''
             INSERT INTO recipes (url, title, slug, ingredients, instructions, user_id)
             VALUES (%s, %s, %s, %s, %s, %s)
-        ''', ("valet.recipes/recipe_display/"+ title_slug, recipe_data["title"], title_slug, json.dumps(recipe_data["ingredients"]), json.dumps(recipe_data["instructions"]), session.get("user_id")))
+        ''', (url if url else:"valet.recipes/recipe_display/"+ title_slug, recipe_data["title"], title_slug, json.dumps(recipe_data["ingredients"]), json.dumps(recipe_data["instructions"]), session.get("user_id")))
         conn.commit()
     except psycopg2.Error as e:
         print(f"Database error in store_recipe: {e}")
