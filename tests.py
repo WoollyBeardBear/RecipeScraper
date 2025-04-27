@@ -13,13 +13,16 @@ class TestTests(unittest.TestCase):
         
     def test_new_scraper(self):
         try:
-            url = "https://www.halfbakedharvest.com/coconut-lime-margaritas/"
+            url = "https://www.allrecipes.com/recipe/143052/sweet-and-spicy-turkey-sandwich/"
             scraped_data = new_scraper(url)
             print("ingredients", process_instructions(scraped_data.instructions()))
         except Exception as e:
             help(scraped_data)
             print(f"Error scraping {url}: {e}")
             self.fail(f"Scraping failed with error: {e}")
+    
+    def test_url(self):
+        
      
 
 
