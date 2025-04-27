@@ -95,6 +95,24 @@ def recipe_display(slug):
     else:
         return "Recipe not found"
 
+@app.route("/manual_add", methods=["GET", "POST"])
+@login_required
+def manual_add():
+    """ Add a manually recipe """
+    if request.method == "POST":
+        title = request.form.get("recipe_title")
+        ingredients = request.form.get("recipe_ingredients").split("\n")
+        instructions = request.form.get("recipe_instructions").split("\n").
+        recipe = {
+            "title": title,
+            "ingredients": ingredients,
+            "instructions": instructions
+        }
+        store_manual_recipe(recipe)
+        return render_template("scraping_in_progress.html", success=True, error_message=None)
+    return render_template("manual_add.html")
+    
+
 @app.route("/add_recipe", methods=["GET", "POST"])
 @login_required
 def add_recipe():

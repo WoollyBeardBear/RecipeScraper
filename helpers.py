@@ -36,6 +36,28 @@ def process_instructions(instructions):
     instructions = [line.strip() for line in instructions]
     return instructions
 
+def store_manual_recipe(recipe_data):
+    conn = None
+    cursor = None
+    try:
+        conn = get_db()
+        cursor = conn.cursor()
+        title_slug = slugify(recipe_data["title"])
+        cursor.execute('''
+            INSERT INTO recipes (url, title, slug, ingredients, instructions, user_id)
+            VALUES (%s, %s, %s, %s, %s, %s)
+        ''', ("valet.recipes/recipe_display/"+ title_slug, recipe_data["title"], title_slug, json.dumps(recipe_data["ingredients"]), json.dumps(recipe_data["instructions"]), session.get("user_id")))
+        conn.commit()
+    except psycopg2.Error as e:
+        print(f"Database error in store_recipe: {e}")
+        if conn:
+            conn.rollback()
+    finally:
+        if cursor:
+            cursor.close()
+        if conn:
+            conn.close()
+
 def store_recipe(recipe_data):
     conn = None
     cursor = None
