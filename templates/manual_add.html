@@ -1,21 +1,21 @@
 {% extends "layout.html" %}
 
 {% block title %}
-    Add recipe
+    Add Recipe
 {% endblock %}
 
 {% block main %}
-<div class="container mt-4"> 
-    <div class="row justify-content-center"> 
-        <div class="col-md-8 col-lg-6"> 
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-6">
 
-            <h1 class="text-center mb-3">Manually Add Your Recipe Here!</h1>
+            <h1 class="text-center mb-4">Manually Add Your Recipe</h1> {# Slightly shorter title, increased bottom margin #}
 
             {# Display flashed messages if available #}
             {% with messages = get_flashed_messages(with_categories=true) %}
                 {% if messages %}
                     {% for category, message in messages %}
-                        <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                        <div class="alert alert-{{ category }} alert-dismissible fade show mb-3" role="alert"> {# Added mb-3 #}
                             {{ message }}
                             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                         </div>
@@ -23,51 +23,62 @@
                 {% endif %}
             {% endwith %}
 
+            <form action="/manual_add" method="post">
 
-            <form action="/manual_add" method="post" class="mb-4">
-                <label for="recipe_title_input" class="form-label visually-hidden">Recipe Title</label>
-                <div class="input-group input-group-lg mb-3"> {# Use input group for potentially adding icons/buttons later #}
+                {# Recipe Title #}
+                <div class="mb-3"> {# Standard margin bottom #}
+                    <label for="recipe_title_input" class="form-label visually-hidden">Recipe Title</label>
                     <input id="recipe_title_input"
                            autofocus
-                           class="form-control"
+                           class="form-control form-control-lg" {# Kept lg for larger text input #}
                            name="recipe_title"
                            placeholder="Recipe Title"
                            type="text"
-                           required> 
+                           required>
                 </div>
-                <label for="recipe_ingredients_input" class="form-label visually-hidden">Recipe Ingredients</label>
-                <p>Please seperate ingredients by line!\n eg. 1 can tomoatoes\n 1 tbsp olive oil\n etc.</p>
-                <div class="input-group input-group-lg mb-3"> 
-                    <input id="recipe_ingredients_input"
-                           class="form-control form-control-lg"
-                           name="recipe_ingredients"
-                           placeholder="Recipe Ingredients"
-                           type="text"
-                           required> 
+
+                {# Recipe Ingredients #}
+                <div class="mb-3">
+                    <label for="recipe_ingredients_input" class="form-label">Ingredients</label> {# Made label visible for clarity #}
+                    <p class="form-text text-muted small">Enter each ingredient on a new line (e.g., 1 can tomatoes).</p> {# Using form-text for hints #}
+                    <textarea id="recipe_ingredients_input"
+                              class="form-control" {# Removed form-control-lg unless you want larger text *inside* #}
+                              name="recipe_ingredients"
+                              placeholder="1 cup flour&#10;1 tsp baking soda&#10;..." {# Placeholder showing newlines #}
+                              rows="8" {# Suggests initial height (user can resize) #}
+                              required></textarea> {# Closing tag required for textarea #}
                 </div>
-                <label for="recipe_instructions_input" class="form-label visually-hidden">Recipe Instructions</label>
-                <p>Please also seperate Instructions by line!</p>
-                <div class="input-group input-group-lg mb-3"> 
-                    <input id="recipe_instructions_input"
-                           class="form-control form-control-lg"
-                           name="recipe_instructions"
-                           placeholder="Recipe Instructions"
-                           type="text"
-                           required> 
+
+                {# Recipe Instructions #}
+                <div class="mb-3">
+                    <label for="recipe_instructions_input" class="form-label">Instructions</label> {# Made label visible #}
+                    <p class="form-text text-muted small">Enter each step on a new line</p>
+                    <textarea id="recipe_instructions_input"
+                              class="form-control"
+                              name="recipe_instructions"
+                              placeholder="1. Preheat oven to 350°F (175°C).&#10;2. Mix dry ingredients.&#10;..." {# Placeholder showing newlines #}
+                              rows="10" {# More rows for instructions #}
+                              required></textarea>
                 </div>
-                <label for="recipe_url_input" class="form-label visually-hidden">Recipe URL (optional)</label>
-                <p>If this recipe has a URL put it here</p>
-                <div class="input-group input-group-lg mb-3"> 
+
+                {# Recipe URL #}
+                <div class="mb-4"> {# Increased margin before button #}
+                    <label for="recipe_url_input" class="form-label">Recipe URL (Optional)</label> 
+                     <p class="form-text text-muted small">If this recipe is from a website, add the link here.</p>
                     <input id="recipe_url_input"
-                           class="form-control"
+                           class="form-control form-control-lg" {# Kept lg #}
                            name="recipe_url"
-                           placeholder="Recipe ULR"
-                           type="text"> 
+                           placeholder="https://www.example.com/your-recipe"
+                           type="url"> {# Use type="url" for better semantics/validation #}
                 </div>
-                <div class="d-grid gap-2"> 
+
+                {# Submit Button #}
+                <div class="d-grid gap-2">
                    <button class="btn btn-primary btn-lg" type="submit">Add Recipe</button>
                 </div>
+            </form> {# Added closing form tag, assuming it was missing before #}
+
         </div>
-    </div> 
-</div> 
+    </div>
+</div>
 {% endblock %}
