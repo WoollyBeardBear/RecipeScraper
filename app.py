@@ -108,8 +108,8 @@ def manual_add():
         recipe = {
             "title": title,
             "ingredients": ingredients,
-            "instructions": instructions
-            "url": url if url else None
+            "instructions": instructions,
+            "url": url 
         }
         store_manual_recipe(recipe)
         return render_template("scraping_in_progress.html", success=True, error_message=None)
