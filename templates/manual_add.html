@@ -1,0 +1,62 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Add recipe
+{% endblock %}
+
+{% block main %}
+<div class="container mt-4"> 
+    <div class="row justify-content-center"> 
+        <div class="col-md-8 col-lg-6"> 
+
+            <h1 class="text-center mb-3">Manually Add Your Recipe Here!</h1>
+
+            {# Display flashed messages if available #}
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                        <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                            {{ message }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+
+
+            <form action="/manual_add" method="post" class="mb-4">
+                <label for="recipe_title_input" class="form-label visually-hidden">Recipe Title</label>
+                <div class="input-group input-group-lg mb-3"> {# Use input group for potentially adding icons/buttons later #}
+                    <input id="recipe_title_input"
+                           autofocus
+                           class="form-control"
+                           name="recipe_url"
+                           placeholder="Recipe Title"
+                           type="text"
+                           required> 
+                </div>
+                <label for="recipe_ingredients_input" class="form-label visually-hidden">Recipe Ingredients</label>
+                <div class="input-group input-group-lg mb-3"> 
+                    <input id="recipe_ingredients_input"
+                           class="form-control form-control-lg"
+                           name="recipe_ingredients"
+                           placeholder="Recipe Ingredients"
+                           type="text"
+                           required> 
+                </div>
+                <label for="recipe_instructions_input" class="form-label visually-hidden">Recipe Instructions</label>
+                <div class="input-group input-group-lg mb-3"> 
+                    <input id="recipe_instructions_input"
+                           class="form-control form-control-lg"
+                           name="recipe_instructions"
+                           placeholder="Recipe Instructions"
+                           type="text"
+                           required> 
+                </div>
+                <div class="d-grid gap-2"> 
+                   <button class="btn btn-primary btn-lg" type="submit">Add Recipe</button>
+                </div>
+        </div>
+    </div> 
+</div> 
+{% endblock %}

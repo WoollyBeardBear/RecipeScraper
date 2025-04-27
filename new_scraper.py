@@ -8,5 +8,6 @@ def new_scraper(url):
     html = requests.get(url).text # retrieves the recipe webpage HTML
     scraper = scrape_html(html, org_url=url)
     return scraper
+        
 
 

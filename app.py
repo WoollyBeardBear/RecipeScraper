@@ -83,6 +83,8 @@ def browse():
 
     return render_template("browse.html", recipes=recipes, search_query=search_query)
 
+# ADD manual recipe entry 
+
 @app.route("/recipe_display/<slug>")
 @login_required
 def recipe_display(slug):
@@ -103,11 +105,13 @@ def add_recipe():
         if not recipe_url:
             flash("Must include a recipe URL")
             return render_template("add_recipe.html")
-        scraped_data = new_scraper(recipe_url)
-        if scraped_data:
-            store_recipe(scraped_data)
-
-        return render_template("scraping_in_progress.html", url=recipe_url)
+        try:
+            scraped_data = new_scraper(recipe_url)
+            if scraped_data:
+                store_recipe(scraped_data)
+            return render_template("scraping_in_progress.html", success=True, error_message=None)
+        except Exception as e:
+            return render_template("scraping_in_progress.html", success=False, error_message=str(e))
     return render_template("add_recipe.html")
 
 @app.route("/scraping_in_progress/<path:url>")
