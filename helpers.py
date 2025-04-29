@@ -45,7 +45,7 @@ def store_manual_recipe(recipe_data):
         title_slug = slugify(recipe_data["title"])
         url = recipe_data["url"]
         if not url:
-            url = f"valet.recipes/recipe_display/{title_slug}"
+            url = f"https://valet.recipes/recipe_display/{title_slug}"
         cursor.execute('''
             INSERT INTO recipes (url, title, slug, ingredients, instructions, user_id)
             VALUES (%s, %s, %s, %s, %s, %s)
