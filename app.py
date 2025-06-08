@@ -5,11 +5,8 @@ from helpers import *
 from psycopg2.extras import DictCursor
 from new_scraper import *
 import datetime
-import time
-import re
 import psycopg2
 import os
-import threading
 
 
 app = Flask(__name__)
